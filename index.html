@@ -1,1 +1,491 @@
-s
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    
+    <title>TegalsariDigital - Aplikasi Data Warga</title>
+    
+    <!-- Preload Font Awesome untuk icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* Reset dan base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            overscroll-behavior: none;
+            background-color: #f8fafc;
+        }
+        
+        /* Full screen container untuk iframe */
+        .fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: #f8fafc;
+        }
+        
+        .fullscreen-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: transparent;
+        }
+        
+        /* WhatsApp button styles */
+        .whatsapp-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        
+        .whatsapp-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+            animation: none;
+        }
+        
+        .whatsapp-button:active {
+            transform: scale(0.95);
+        }
+        
+        .whatsapp-icon {
+            width: 32px;
+            height: 32px;
+            fill: white;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+        }
+        
+        /* Pulse animation untuk WhatsApp button */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.7), 0 0 0 10px rgba(37, 211, 102, 0.1);
+            }
+            100% {
+                box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            }
+        }
+        
+        /* Enhanced Loading Screen Styles */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loading-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+        
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .spinner-ring:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 10px;
+            left: 10px;
+            animation-delay: -0.3s;
+            border-top-color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .spinner-ring:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            top: 20px;
+            left: 20px;
+            animation-delay: -0.6s;
+            border-top-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        /* Style untuk jika iframe error */
+        .iframe-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .iframe-error h2 {
+            color: #ef4444;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .iframe-error p {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .retry-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 16px;
+        }
+        
+        .retry-button:hover {
+            background: #2563eb;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .whatsapp-button {
+                width: 50px;
+                height: 50px;
+                bottom: 15px;
+                left: 15px;
+            }
+            
+            .whatsapp-icon {
+                width: 26px;
+                height: 26px;
+            }
+            
+            .loading-spinner {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .loading-text {
+                font-size: 20px;
+            }
+            
+            .loading-subtext {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .whatsapp-button {
+                width: 45px;
+                height: 45px;
+                bottom: 10px;
+                left: 10px;
+            }
+            
+            .whatsapp-icon {
+                width: 22px;
+                height: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- WhatsApp Help Button -->
+    <a class='whatsapp-button' href='https://wa.me/6285728441100' rel='noopener noreferrer' target='_blank' title='Halo! Saya butuh bantuan mengenai Aplikasi TegalsariDigital'>
+        <svg aria-label='Bantuan WhatsApp' class='whatsapp-icon' viewBox='0 0 24 24'>
+            <path d='M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488'/>
+        </svg>
+    </a>
+
+    <!-- Full Screen Embedded URL -->
+    <div class='fullscreen-container'>
+        <iframe allow='clipboard-write; clipboard-read' allowfullscreen='true' class='fullscreen-iframe' frameborder='0' id='main-iframe' mozallowfullscreen='true' onerror='iframeError()' onload='iframeLoaded()' sandbox='allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-presentation' src='https://script.google.com/macros/s/AKfycbzNseQCiulRZ9C3JeCB_lSSMML8ZsIHo9S-6ulDvYzXCQfX_cSPpXJ1lViftFAfbfT5/exec' style='opacity: 0; transition: opacity 0.3s ease-in;' title='Aplikasi TegalsariDigital - Data Warga RT 01/RW 08' webkitallowfullscreen='true'>
+        </iframe>
+    </div>
+
+    <!-- Error fallback container -->
+    <div class='iframe-error' id='error-container' style='display: none;'>
+        <h2>Gagal Memuat Aplikasi</h2>
+        <p>Maaf, terjadi masalah saat memuat aplikasi TegalsariDigital. Pastikan Anda terhubung ke internet dan coba lagi.</p>
+        <div style='margin-top: 20px; font-size: 14px; color: #94a3b8;'>
+            <p>Jika masalah berlanjut:</p>
+            <ol style='text-align: left; max-width: 400px; margin: 10px auto;'>
+                <li>Pastikan koneksi internet stabil</li>
+                <li>Coba refresh halaman (F5)</li>
+                <li>Clear cache browser</li>
+                <li>Hubungi admin melalui WhatsApp</li>
+            </ol>
+        </div>
+        <button class='retry-button' onclick='retryLoading()' style='margin-top: 20px;'>🔄 Coba Lagi</button>
+    </div>
+
+    <!-- Enhanced Loading Screen -->
+    <div class='loading-container' id='loading'>
+        <div class='loading-content'>
+            <div class='loading-spinner'>
+                <div class='spinner-ring'></div>
+                <div class='spinner-ring'></div>
+                <div class='spinner-ring'></div>
+            </div>
+            <div class='loading-text'>Memuat Aplikasi TegalsariDigital</div>
+            <div class='loading-subtext'>RT 01/RW 08 - Sedang menyiapkan data...</div>
+            <div id='loading-progress' style='margin-top: 20px; font-size: 12px; opacity: 0.7;'>
+                Status: Menghubungkan...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced loading dengan handling error dan debugging
+        var loadingTimeout;
+        var iframe = document.getElementById('main-iframe');
+        var loading = document.getElementById('loading');
+        var errorContainer = document.getElementById('error-container');
+        var loadingProgress = document.getElementById('loading-progress');
+        
+        // Log untuk debugging
+        console.log('App started: Aplikasi dimulai');
+        
+        // Update progress text
+        function updateProgress(text) {
+            if (loadingProgress) {
+                loadingProgress.textContent = 'Status: ' + text;
+            }
+        }
+        
+        // Function untuk hide loading dengan animasi
+        function hideLoading() {
+            clearTimeout(loadingTimeout);
+            console.log('App: Menyembunyikan loading screen');
+            updateProgress('Selesai');
+            
+            loading.classList.add('fade-out');
+            setTimeout(function() {
+                loading.style.display = 'none';
+                // Tampilkan iframe dengan fade in
+                iframe.style.opacity = '1';
+            }, 500);
+        }
+        
+        // Function untuk show error
+        function showError(message) {
+            hideLoading();
+            console.error('App: Error - ' + message);
+            
+            // Update error message jika ada
+            if (message) {
+                var errorMsg = errorContainer.querySelector('p');
+                if (errorMsg) {
+                    errorMsg.textContent = message;
+                }
+            }
+            
+            errorContainer.style.display = 'flex';
+            iframe.style.display = 'none';
+        }
+        
+        // Function untuk hide error
+        function hideError() {
+            errorContainer.style.display = 'none';
+            iframe.style.display = 'block';
+        }
+        
+        // Ketika iframe berhasil load
+        function iframeLoaded() {
+            console.log('App: Iframe berhasil dimuat');
+            updateProgress('Aplikasi siap');
+            
+            // Tunggu sedikit untuk memastikan konten iframe sudah siap
+            setTimeout(function() {
+                hideLoading();
+                hideError();
+                
+                // Coba komunikasi dengan iframe
+                try {
+                    var iframeWindow = iframe.contentWindow;
+                    // Kirim event ke iframe untuk memberi tahu bahwa parent sudah siap
+                    iframeWindow.postMessage({
+                        type: 'parentLoaded',
+                        message: 'Parent container siap'
+                    }, '*');
+                    
+                    console.log('App: Mengirim pesan ke iframe');
+                } catch (e) {
+                    console.warn('App: Tidak bisa mengirim pesan ke iframe (CORS)');
+                }
+            }, 1000);
+        }
+        
+        // Ketika iframe error
+        function iframeError() {
+            console.error('App: Iframe gagal dimuat');
+            updateProgress('Gagal memuat');
+            showError('Tidak dapat terhubung ke server aplikasi. Periksa koneksi internet Anda.');
+        }
+        
+        // Retry loading
+        function retryLoading() {
+            console.log('App: Mencoba memuat ulang');
+            hideError();
+            loading.style.display = 'flex';
+            loading.classList.remove('fade-out');
+            iframe.style.opacity = '0';
+            updateProgress('Mencoba menghubungkan...');
+            
+            // Force reload iframe dengan cache busting
+            var currentSrc = iframe.src;
+            var separator = currentSrc.indexOf('?') === -1 ? '?' : '&';
+            iframe.src = currentSrc.split('#')[0] + separator + 'retry=' + new Date().getTime();
+            
+            // Timeout jika masih gagal
+            loadingTimeout = setTimeout(function() {
+                iframeError();
+            }, 10000);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('App: DOM siap');
+            updateProgress('Mempersiapkan halaman...');
+            
+            // Set timeout untuk backup loading (15 detik)
+            loadingTimeout = setTimeout(function() {
+                console.warn('App: Timeout - Iframe terlalu lama loading');
+                iframeError();
+            }, 15000);
+            
+            // Listen untuk pesan dari iframe
+            window.addEventListener('message', function(event) {
+                // Jika iframe mengirim pesan bahwa aplikasi siap
+                if (event.data && event.data.type === 'appReady') {
+                    console.log('App: Aplikasi dalam iframe melaporkan siap');
+                    hideLoading();
+                }
+                
+                // Jika iframe meminta reload
+                if (event.data && event.data.type === 'requestReload') {
+                    console.log('App: Iframe meminta reload');
+                    retryLoading();
+                }
+            });
+            
+            // Handle visibility change untuk reload jika kembali ke tab
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && iframe.style.display === 'none') {
+                    console.log('App: Tab menjadi visible, coba reload');
+                    retryLoading();
+                }
+            });
+        });
+        
+        // Prevent right click pada tombol WA
+        document.addEventListener('contextmenu', function(e) {
+            if (!e.target.closest('.whatsapp-button')) {
+                // e.preventDefault(); // Uncomment jika ingin disable klik kanan
+            }
+        }, false);
+        
+        // Handle sebelum unload
+        window.addEventListener('beforeunload', function() {
+            clearTimeout(loadingTimeout);
+        });
+        
+        // Cek jika iframe sudah load sebelumnya (cache)
+        window.onload = function() {
+            console.log('App: Window onload');
+            updateProgress('Memeriksa cache...');
+            
+            // Jika iframe sudah selesai load (dari cache)
+            if (iframe.contentWindow && iframe.contentWindow.document.readyState === 'complete') {
+                console.log('App: Iframe sudah dimuat dari cache');
+                setTimeout(function() {
+                    iframeLoaded();
+                }, 500);
+            }
+        };
+    </script>
+</body>
+</html>
